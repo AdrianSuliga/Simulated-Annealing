@@ -1,4 +1,4 @@
-from random import randint, random
+from random import randint, random, shuffle
 from math import exp
 import matplotlib.pyplot as plt 
 import argparse
@@ -37,19 +37,23 @@ def parse_distance_mode(fun: str, funs: list) -> callable:
 
 # GENERATING CLOUD OF POINTS
 def generate_points(n: int, mode: str) -> list:
+    result = []
     if mode == "r":
-        return random_cloud(n)
+        result = random_cloud(n)
     elif mode == "n":
         clusters = [
             {"mean": [-100, -100], "cov": [[600, 400], [400, 600]]},
             {"mean": [0, 100], "cov": [[600, 400], [400, 600]]},
             {"mean": [100, -100], "cov": [[600, 400], [400, 600]]}
         ]
-        return normal_distribution(n, clusters)
+        result = normal_distribution(n, clusters)
     elif mode == "g":
-        return nine_groups(n, 300)
+        result = nine_groups(n, 300)
     else:
         raise TypeError(f"Incorrect generation mode given - {mode}")
+
+    shuffle(result)
+    return result
 
 # Random generation
 def random_cloud(n: int) -> list:
@@ -296,7 +300,6 @@ def main() -> None:
     distance_mode = validate_mode(args.distance_metric, ["e", "m"])
     make_gif = args.gif 
 
-    print(n, generation_mode, max_iter, initial_temperature, neighbour_mode, distance_mode, make_gif)
     simulated_annealing(
         generate_points(n, generation_mode),
         max_iter,
