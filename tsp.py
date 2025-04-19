@@ -17,23 +17,23 @@ def validate_mode(data: str, modes: list) -> str:
     if data in modes:
         return data
     else:
-        raise TypeError("Invalid mode given")
+        raise TypeError(f"Invalid mode given, received {data} but expected one of {modes}")
     
-def parse_neighbour_fun(fun: str) -> callable:
+def parse_neighbour_fun(fun: str, funs: list) -> callable:
     if fun == "r": 
         return random_swap
     elif fun == "c":
         return consecutive_swap
     else:
-        raise TypeError("Invalid neighbour function was given")
+        raise TypeError(f"Invalid neighbour function was given. Got {fun}, expected one of {funs}")
 
-def parse_distance_mode(fun: str) -> callable:
+def parse_distance_mode(fun: str, funs: list) -> callable:
     if fun == "e":
         return euclidean_distance
     elif fun == "m":
         return manhatan_distance
     else:
-        raise TypeError("Invalid distance function was given")
+        raise TypeError(f"Invalid distance function was given. Got {fun}, expected one of {funs}")
 
 # GENERATING CLOUD OF POINTS
 def generate_points(n: int, mode: str) -> list:
@@ -49,7 +49,7 @@ def generate_points(n: int, mode: str) -> list:
     elif mode == "g":
         return nine_groups(n, 300)
     else:
-        raise TypeError("Incorrect generation mode given")
+        raise TypeError(f"Incorrect generation mode given - {mode}")
 
 # Random generation
 def random_cloud(n):
@@ -214,6 +214,7 @@ def simulated_annealing(points, max_iter, initial_temp,
         except:
             pass
         plt.close(fig)
+        print("GIF generated in output/animation.gif")
 
     # Plotting solutions
     fig, axs = plt.subplots(2)
@@ -240,7 +241,7 @@ def main():
     parser = argparse.ArgumentParser(description = "Solve TSP using simulated annealing")
 
     parser.add_argument(
-        "points_number",
+        "number_of_points",
         help = "Number of points to generate",
         type = int
     )
@@ -265,30 +266,33 @@ def main():
 
     parser.add_argument(
         "neighbour_function",
-        help = "How to choose next state in an algorithm? (r / c)",
+        help = "How to choose next state in an algorithm? \
+                You can choose random or consecutive swap (r / c)",
         type = str
     )
 
     parser.add_argument(
-        "distance_function",
-        help = "How to calculate distance between two cities? (e / m)",
+        "distance_metric",
+        help = "How to calculate distance between two cities?\n\
+                You can choose either euclidean or manhatan metric (e / m)",
         type = str
     )
 
     parser.add_argument(
         '--gif',
-        action=argparse.BooleanOptionalAction,
+        help = "Do you want to make a GIF showcasing how the algorithm works?",
+        action = argparse.BooleanOptionalAction,
         default = False
     )
 
     args = parser.parse_args()
 
-    n = validate_positive_int(args.points_number)
+    n = validate_positive_int(args.number_of_points)
     generation_mode = validate_mode(args.how_to_generate, ["r", "n", "g"])
     max_iter = validate_positive_int(args.max_iterations)
     initial_temperature = validate_positive_int(args.initial_temperature)
     neighbour_mode = validate_mode(args.neighbour_function, ["r", "c"])
-    distance_mode = validate_mode(args.distance_function, ["e", "m"])
+    distance_mode = validate_mode(args.distance_metric, ["e", "m"])
     make_gif = args.gif 
 
     print(n, generation_mode, max_iter, initial_temperature, neighbour_mode, distance_mode, make_gif)
@@ -296,8 +300,8 @@ def main():
         generate_points(n, generation_mode),
         max_iter,
         initial_temperature,
-        parse_neighbour_fun(neighbour_mode),
-        parse_distance_mode(distance_mode),
+        parse_neighbour_fun(neighbour_mode, ["r", "c"]),
+        parse_distance_mode(distance_mode, ["e", "m"]),
         make_gif
     )
 
