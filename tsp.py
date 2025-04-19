@@ -6,7 +6,52 @@ import numpy as np
 import os, tempfile
 from PIL import Image
 
-# GENERATING CLOUD OF POINT
+# VALIDATION OF COMMAND LINE ARGUMENTS
+def validate_positive_int(data: int) -> int:
+    if data > 0:
+        return data
+    else:
+        raise TypeError("Only positive numbers can be used")
+
+def validate_mode(data: str, modes: list) -> str:
+    if data in modes:
+        return data
+    else:
+        raise TypeError("Invalid mode given")
+    
+def parse_neighbour_fun(fun: str) -> callable:
+    if fun == "r": 
+        return random_swap
+    elif fun == "c":
+        return consecutive_swap
+    else:
+        raise TypeError("Invalid neighbour function was given")
+
+def parse_distance_mode(fun: str) -> callable:
+    if fun == "e":
+        return euclidean_distance
+    elif fun == "m":
+        return manhatan_distance
+    else:
+        raise TypeError("Invalid distance function was given")
+
+# GENERATING CLOUD OF POINTS
+def generate_points(n: int, mode: str) -> list:
+    if mode == "r":
+        return random_cloud(n)
+    elif mode == "n":
+        clusters = [
+            {"mean": [-100, -100], "cov": [[600, 400], [400, 600]]},
+            {"mean": [0, 100], "cov": [[600, 400], [400, 600]]},
+            {"mean": [100, -100], "cov": [[600, 400], [400, 600]]}
+        ]
+        return normal_distribution(n, clusters)
+    elif mode == "g":
+        return nine_groups(n, 300)
+    else:
+        raise TypeError("Incorrect generation mode given")
+
+# Random generation
 def random_cloud(n):
     return [(randint(0, 100), randint(0, 100)) for _ in range(n)]
 
@@ -56,6 +101,9 @@ def cycle_length(points, distance):
 def euclidean_distance(p1, p2): 
     return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
 
+def manhatan_distance(p1, p2):
+    return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
+
 # TEMPERATURE
 def euler_temp(x, T0):
     return T0 * exp(-x / T0)
@@ -65,7 +113,7 @@ def schedule_prob(E, T):
     return exp(E / T)
 
 # CHOOSING NEIGHBOUR
-def arbitrary_swap(state: list):
+def random_swap(state: list):
     result = state[:]
     size = len(state)
     i = j = 0
@@ -87,7 +135,7 @@ def consecutive_swap(state: list):
 # SIMULATED ANNEALING
 # Generating GIF is optional as it takes a lot of time
 def simulated_annealing(points, max_iter, initial_temp, 
-                        neighbour_fun, distance_fun, make_gif = False):
+                        neighbour_fun, distance_fun, make_gif):
     xs, ys = [], []
     frame_paths = []  
     temp_dir = None
@@ -124,7 +172,7 @@ def simulated_annealing(points, max_iter, initial_temp,
         ys.append(cycle_length(points, distance_fun))
 
         # We save only 1% of frames
-        if make_gif and i % (max_iter // 100) == 0:
+        if make_gif and (max_iter < 1000 or i % (max_iter // 100) == 0):
             x_coords = [x for x, _ in points]
             y_coords = [y for _, y in points]
             x_coords.append(points[0][0])
@@ -189,7 +237,69 @@ def simulated_annealing(points, max_iter, initial_temp,
     plt.show()
 
 def main():
-    pass
+    parser = argparse.ArgumentParser(description = "Solve TSP using simulated annealing")
+
+    parser.add_argument(
+        "points_number",
+        help = "Number of points to generate",
+        type = int
+    )
+
+    parser.add_argument(
+        "how_to_generate", 
+        help = "How to generate cloud of points? (r / n / g)", 
+        type = str
+    )
+
+    parser.add_argument(
+        "max_iterations",
+        help = "Number of iterations for algorithm",
+        type = int
+    )
+
+    parser.add_argument(
+        "initial_temperature",
+        help = "Initial temperature for the algorithm",
+        type = int
+    )
+
+    parser.add_argument(
+        "neighbour_function",
+        help = "How to choose next state in an algorithm? (r / c)",
+        type = str
+    )
+
+    parser.add_argument(
+        "distance_function",
+        help = "How to calculate distance between two cities? (e / m)",
+        type = str
+    )
+
+    parser.add_argument(
+        '--gif',
+        action=argparse.BooleanOptionalAction,
+        default = False
+    )
+
+    args = parser.parse_args()
+
+    n = validate_positive_int(args.points_number)
+    generation_mode = validate_mode(args.how_to_generate, ["r", "n", "g"])
+    max_iter = validate_positive_int(args.max_iterations)
+    initial_temperature = validate_positive_int(args.initial_temperature)
+    neighbour_mode = validate_mode(args.neighbour_function, ["r", "c"])
+    distance_mode = validate_mode(args.distance_function, ["e", "m"])
+    make_gif = args.gif 
+
+    print(n, generation_mode, max_iter, initial_temperature, neighbour_mode, distance_mode, make_gif)
+    simulated_annealing(
+        generate_points(n, generation_mode),
+        max_iter,
+        initial_temperature,
+        parse_neighbour_fun(neighbour_mode),
+        parse_distance_mode(distance_mode),
+        make_gif
+    )
 
 if __name__ == "__main__":
     main()
