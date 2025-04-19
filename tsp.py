@@ -52,11 +52,11 @@ def generate_points(n: int, mode: str) -> list:
         raise TypeError(f"Incorrect generation mode given - {mode}")
 
 # Random generation
-def random_cloud(n):
+def random_cloud(n: int) -> list:
     return [(randint(0, 100), randint(0, 100)) for _ in range(n)]
 
 # Generate points in clusters specified by user
-def normal_distribution(n, clusters):
+def normal_distribution(n: int, clusters: list) -> list:
     points = []
     num_clusters = len(clusters)
     base_pts = n // num_clusters
@@ -70,7 +70,7 @@ def normal_distribution(n, clusters):
     return points
 
 # Generate points in 9 predefined clusters separated by padding
-def nine_groups(n, padding):
+def nine_groups(n: int, padding: int) -> list:
     clusters = [
         {"mean": [-padding, padding], "cov": [[600, 400], [400, 600]]},
         {"mean": [0, padding], "cov": [[600, 400], [400, 600]]},
@@ -86,7 +86,7 @@ def nine_groups(n, padding):
     return normal_distribution(n, clusters)
 
 # CYCLE LENGTH
-def cycle_length(points, distance):
+def cycle_length(points: list, distance: callable) -> float: 
     size = len(points)
     sum = 0
 
@@ -98,22 +98,22 @@ def cycle_length(points, distance):
     return sum
 
 # DISTANCE
-def euclidean_distance(p1, p2): 
+def euclidean_distance(p1: tuple, p2: tuple) -> float: 
     return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
 
-def manhatan_distance(p1, p2):
+def manhatan_distance(p1: tuple, p2: tuple) -> float:
     return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
 
 # TEMPERATURE
-def euler_temp(x, T0):
+def euler_temp(x: int, T0: float) -> float:
     return T0 * exp(-x / T0)
 
 # PROBABILITY
-def schedule_prob(E, T):
+def schedule_prob(E: float, T: float) -> float:
     return exp(E / T)
 
 # CHOOSING NEIGHBOUR
-def random_swap(state: list):
+def random_swap(state: list) -> list:
     result = state[:]
     size = len(state)
     i = j = 0
@@ -124,7 +124,7 @@ def random_swap(state: list):
     result[i], result[j] = result[j], result[i]
     return result
 
-def consecutive_swap(state: list):
+def consecutive_swap(state: list) -> list:
     result = state[:]
     size = len(state)
     i = randint(0, size - 2)
@@ -134,8 +134,8 @@ def consecutive_swap(state: list):
 
 # SIMULATED ANNEALING
 # Generating GIF is optional as it takes a lot of time
-def simulated_annealing(points, max_iter, initial_temp, 
-                        neighbour_fun, distance_fun, make_gif):
+def simulated_annealing(points: list, max_iter: int, initial_temp: int, 
+                        neighbour_fun: callable, distance_fun: callable, make_gif: bool) -> None:
     xs, ys = [], []
     frame_paths = []  
     temp_dir = None
@@ -151,6 +151,7 @@ def simulated_annealing(points, max_iter, initial_temp,
         plt.tight_layout()
         plt.grid(True)
         temp_dir = tempfile.mkdtemp()
+        os.makedirs("output", exist_ok = True)
 
     # Annealing
     for i in range(1, max_iter + 1):
@@ -237,7 +238,7 @@ def simulated_annealing(points, max_iter, initial_temp,
     plt.tight_layout()
     plt.show()
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description = "Solve TSP using simulated annealing")
 
     parser.add_argument(
