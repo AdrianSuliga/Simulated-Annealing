@@ -6,7 +6,32 @@ import os, tempfile
 from PIL import Image
 import numpy as np
 
-def random_image(n:int, delta:float):
+# VALIDATION OF COMMAND LINE ARGUMENTS
+def validate_positive_int(data: int) -> int:
+    if data > 0:
+        return data
+    else:
+        raise TypeError("Only positive numbers can be used")
+    
+def validate_float(data: float) -> float:
+    if 0 < data < 1:
+        return data
+    else:
+        raise TypeError("Float values has to be between 0 and 1")
+    
+def validate_neighbour_fun(fun: int) -> callable:
+    all_funs = [
+        point_energy_8_neighbours,
+        point_energy_8_neighbours_v2,
+        point_energy_4_neighbours_plus,
+        point_energy_4_neighbours_cross,
+        point_energy_8_neighbours_cross
+    ]
+
+    if 0 <= fun <= 4: return all_funs[fun]
+    else: raise TypeError("Index out of range, has to be 0 - 4")
+
+def random_image(n: int, delta: float):
     M = [[1 if random() > delta else 0 for _ in range(n)] for _ in range(n)]
 
     plt.imshow(M, cmap = 'gray', interpolation = 'nearest')
@@ -199,8 +224,13 @@ def simulated_annealing(points, max_iter, init_temp, point_energy_function, offs
     plt.grid(True)
     plt.show()
 
-offsets = [(-1, -1), (1, 1), (1, -1), (-1, 1), (-2, -2), (2, 2), (2, -2), (-2, 2)]
-simulated_annealing(random_image(400, 0.4), 10000000, 100, point_energy_8_neighbours_cross, offsets, 1e-5, True)
+offsets = {
+    point_energy_8_neighbours: [(-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)],
+    point_energy_8_neighbours_v2: [(-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)],
+    point_energy_4_neighbours_plus: [(0, -1), (1, 0), (0, 1), (-1, 0)],
+    point_energy_4_neighbours_cross: [(-1, -1), (1, 1), (-1, 1), (1, -1)],
+    point_energy_8_neighbours_cross: [(-1, -1), (1, 1), (1, -1), (-1, 1), (-2, -2), (2, 2), (2, -2), (-2, 2)]
+}
 
 def main() -> None:
     parser = argparse.ArgumentParser(description = "Generate cool images with simulated annealing")
@@ -250,6 +280,23 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    n = validate_positive_int(args.image_size)
+    delta = validate_float(args.black_points_density)
+    max_iter = validate_positive_int(args.max_iterations)
+    initial_temp = validate_positive_int(args.initial_temperature)
+    slope = validate_positive_int(args.temperature_slope)
+    func = validate_neighbour_fun(args.neighbour_function)
+    make_gif = args.gif
+
+    simulated_annealing(
+        random_image(n, delta),
+        max_iter,
+        initial_temp,
+        func,
+        offsets[func],
+        10 ** (-slope),
+        make_gif
+    )
 
 
 if __name__ == "__main__":
