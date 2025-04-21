@@ -51,3 +51,5 @@ If you chose to make GIF you will end up with cool animation like these ones:
 ![](readme_sources/G75.gif)
 
 ![](readme_sources/T50.gif)
+
+## Binary image

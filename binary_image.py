@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from random import random, randint
 from math import exp
+import argparse
 import os, tempfile
 from PIL import Image
 import numpy as np
@@ -151,8 +152,9 @@ def simulated_annealing(points, max_iter, init_temp, point_energy_function, offs
         xs.append(i)
         ys.append(all_energy)
 
-        if make_gif and i % 4000 == 0:
-            print(f"Generowanie klatek... {round(i * 100 / max_iter, 2)}%")
+        # We save only 1% of frames
+        if make_gif and (max_iter < 1000 or i % (max_iter // 100) == 0):
+            print(f"Generating frames... {round(i * 100 / max_iter, 2)}%")
             img_array = np.array(points, dtype = np.uint8) * 255
             img = Image.fromarray(img_array, mode='L')
             frame_path = os.path.join(temp_dir, f"frame_{i:04d}.png")
@@ -160,7 +162,7 @@ def simulated_annealing(points, max_iter, init_temp, point_energy_function, offs
             frame_paths.append(frame_path)
 
     if make_gif:
-        print("Wygenerowano dane\nTworzenie pliku GIF, może to chwilę potrwać...")
+        print("Data generated\nCreating GIF, this may take a while...")
         try:
             with Image.open(frame_paths[0]) as first_frame:
                 other_frames = [Image.open(f) for f in frame_paths[1:]]
@@ -186,6 +188,7 @@ def simulated_annealing(points, max_iter, init_temp, point_energy_function, offs
             os.rmdir(temp_dir)
         except:
             pass
+        print("GIF generated in output/animation.gif")
 
     plt.imshow(points, cmap = 'gray', interpolation = 'nearest')
     plt.axis('off')
@@ -198,3 +201,56 @@ def simulated_annealing(points, max_iter, init_temp, point_energy_function, offs
 
 offsets = [(-1, -1), (1, 1), (1, -1), (-1, 1), (-2, -2), (2, 2), (2, -2), (-2, 2)]
 simulated_annealing(random_image(400, 0.4), 10000000, 100, point_energy_8_neighbours_cross, offsets, 1e-5, True)
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description = "Generate cool images with simulated annealing")
+
+    parser.add_argument(
+        "image_size",
+        help = "Number of pixels in one row of square image",
+        type = int
+    )
+
+    parser.add_argument(
+        "black_points_density",
+        help = "Density of black points - number between 0 and 1",
+        type = float
+    )
+
+    parser.add_argument(
+        "max_iterations",
+        help = "Number of iterations for algorithm",
+        type = int
+    )
+
+    parser.add_argument(
+        "initial_temperature",
+        help = "Initial temperature for the algorithm",
+        type = int
+    )
+
+    parser.add_argument(
+        "temperature_slope",
+        help = "How fast should temperature decrease. The higher the number, the slower the fall",
+        type = int
+    )
+
+    parser.add_argument(
+        "neighbour_function",
+        help = "How do we define neighbours?",
+        type = int
+    )
+
+    parser.add_argument(
+        '--gif',
+        help = "Do you want to make a GIF showcasing how the algorithm works?",
+        action = argparse.BooleanOptionalAction,
+        default = False
+    )
+
+    args = parser.parse_args()
+
+
+
+if __name__ == "__main__":
+    main()
