@@ -31,7 +31,8 @@ def validate_neighbour_fun(fun: int) -> callable:
     if 0 <= fun <= 4: return all_funs[fun]
     else: raise TypeError("Index out of range, has to be 0 - 4")
 
-def random_image(n: int, delta: float):
+# GENERATING RANDOM BINARY IMAGE
+def random_image(n: int, delta: float) -> list:
     M = [[1 if random() > delta else 0 for _ in range(n)] for _ in range(n)]
 
     plt.imshow(M, cmap = 'gray', interpolation = 'nearest')
@@ -40,7 +41,9 @@ def random_image(n: int, delta: float):
 
     return M
 
-def point_energy_8_neighbours(M, i, j):
+# ENERGY FUNCTIONS
+# High energy when neighbours circling given point are different
+def point_energy_8_neighbours(M: list, i: int, j: int) -> int:
     result, n = 0, len(M)
     points = [(-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
 
@@ -50,7 +53,8 @@ def point_energy_8_neighbours(M, i, j):
 
     return result
 
-def point_energy_8_neighbours_v2(M, i, j):
+# High energy when neighbours circling given point are the same
+def point_energy_8_neighbours_v2(M: list, i: int, j: int) -> int:
     result, n = 0, len(M)
     points = [(-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
 
@@ -60,7 +64,8 @@ def point_energy_8_neighbours_v2(M, i, j):
 
     return result
 
-def point_energy_4_neighbours_plus(M, i, j):
+# High energy when neighbours on plus positions are different
+def point_energy_4_neighbours_plus(M: list, i: int, j: int) -> int:
     result, n = 0, len(M)
     points = [(0, -1), (1, 0), (0, 1), (-1, 0)]
 
@@ -70,7 +75,8 @@ def point_energy_4_neighbours_plus(M, i, j):
 
     return result
 
-def point_energy_4_neighbours_cross(M, i, j):
+# High energy when neighbours on cross positions are different
+def point_energy_4_neighbours_cross(M: list, i: int, j: int) -> int:
     result, n = 0, len(M)
     points = [(-1, -1), (1, 1), (-1, 1), (1, -1)]
 
@@ -80,7 +86,8 @@ def point_energy_4_neighbours_cross(M, i, j):
 
     return result
 
-def point_energy_8_neighbours_cross(M, i, j): 
+# High energy when neighbours on wider cross positions are the same
+def point_energy_8_neighbours_cross(M: list, i: int, j: int) -> int: 
     result, n = 0, len(M)
 
     points = [(-1, -1), (1, 1), (1, -1), (-1, 1), (-2, -2), (2, 2), (2, -2), (-2, 2)]
@@ -91,7 +98,8 @@ def point_energy_8_neighbours_cross(M, i, j):
 
     return result
 
-def calculate_energy(M, point_energy_function):
+# Calculate energy
+def calculate_energy(M: list, point_energy_function: callable) -> int:
     sum, n = 0, len(M)
 
     for i in range(n):
@@ -100,14 +108,18 @@ def calculate_energy(M, point_energy_function):
 
     return sum
 
-def temp_fun(T0, a):
+# TEMPERATURE
+def temp_fun(T0: float, a: float) -> float:
     return T0 * (1 - a)
 
-def schedule_prob(E, T):
+# PROBABILITY
+def schedule_prob(E: int, T: float) -> float:
     if E < 0: return 1
     return exp(-E / T)
 
-def schedule_neighbour(points):
+# SIMULATED ANNEALING
+# Neighbour selecting
+def schedule_neighbour(points: list) -> tuple:
     n = len(points)
 
     while True:
@@ -117,7 +129,9 @@ def schedule_neighbour(points):
 
     return ((x1, y1), (x2, y2))
 
-def calculate_point_energy_difference(points, P1, P2, point_energy_function, offsets):
+# Energy difference helper function
+def calculate_point_energy_difference(points:list, P1:tuple, P2:tuple, 
+                                      point_energy_function: callable, offsets: list) -> int:
     x1, y1 = P1
     x2, y2 = P2
 
@@ -148,7 +162,10 @@ def calculate_point_energy_difference(points, P1, P2, point_energy_function, off
 
     return end_energy - start_energy
 
-def simulated_annealing(points, max_iter, init_temp, point_energy_function, offsets, a, make_gif = False):
+# Making GIF is optional since it takes a lot of time
+def simulated_annealing(points: list, max_iter: int, init_temp: int, 
+                        point_energy_function: callable, offsets: list, 
+                        a: float, make_gif: bool = False) -> None:
     xs, ys = [], []
     T = init_temp
     temp_dir = None
