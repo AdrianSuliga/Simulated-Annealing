@@ -197,7 +197,7 @@ def simulated_annealing(points: list, max_iter: int, initial_temp: int,
             with Image.open(frame_paths[0]) as first_frame:
                 other_frames = [Image.open(f) for f in frame_paths[1:]]
                 first_frame.save(
-                    'output/animation.gif',
+                    'animation.gif',
                     format = 'GIF',
                     append_images = other_frames,
                     save_all = True,
@@ -219,7 +219,7 @@ def simulated_annealing(points: list, max_iter: int, initial_temp: int,
         except:
             pass
         plt.close(fig)
-        print("GIF generated in output/animation.gif")
+        print("GIF generated in animation.gif")
 
     # Plotting solutions
     fig, axs = plt.subplots(2)

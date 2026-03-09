@@ -230,7 +230,7 @@ def simulated_annealing(points: list, max_iter: int, init_temp: int,
             os.rmdir(temp_dir)
         except:
             pass
-        print("GIF generated in output/animation.gif")
+        print("GIF generated in animation.gif")
 
     plt.imshow(points, cmap = 'gray', interpolation = 'nearest')
     plt.axis('off')
@@ -284,7 +284,7 @@ def main() -> None:
 
     parser.add_argument(
         "neighbour_function",
-        help = "How do we define neighbours?",
+        help = "How do we define neighbours? [0-4]",
         type = int
     )
 
