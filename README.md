@@ -23,7 +23,9 @@ pip3 install -r requirements.txt
 ```
 
 ## Traveling Salesman Problem
-In this problem we are given a cloud of 2D points and we want to find shortest cycle that goes through each of them. This is a classic problem that showcases usage of simulated annealing. We define **energy** as length of current cycle, **state** is a list of 2D points sorted in order in which we want to visit them. Implementation of this is prepared in ```tsp.py``` file. My program is expecting a few command line arguments that let you customize how it is working. The usage goes like this
+
+In this problem we are given a cloud of 2D points and we want to find shortest cycle that goes through each of them. This is a classic problem that showcases usage of simulated annealing. We define **energy** as length of current cycle, **state** is a list of 2D points sorted in order in which we want to visit them. Implementation of this is prepared in ```tsp.py``` file. My program is expecting a few command line arguments that let you customize how it is working. The usage goes like this:
+
 ```
 python3 tsp.py [--gif] <number_of_points> <how_to_generate_points> <max_iteration> <initial_temperature> <neighbour_function> <distance_metric>  
 ```
@@ -32,7 +34,7 @@ python3 tsp.py [--gif] <number_of_points> <how_to_generate_points> <max_iteratio
 - ```<number_of_points>``` is a number of... 2D points to generate like this is self-explanatory.
 - ```<how_to_generate>``` is one of chars ```r```, ```n```, ```g```. If you choose ```r```, data will be generated randomly, ```g``` generates points in 9 clusters separated from each other while ```n``` only in 3 clusters.
 - ```<max_iteration>``` is a number of iterations algorithm should do. It is advisable to set this number to a high value like ```100 000``` or more.
-- ```<initial_temperatur>``` is a starting temperature for simulated annealing algorithm, you can start by setting it to be 1 / 10 of ```<max_iteration>``` and than well feel free to experiment.
+- ```<initial_temperature>``` is a starting temperature for simulated annealing algorithm, you can start by setting it to be 1 / 10 of ```<max_iteration>``` and than well feel free to experiment.
 - ```<neighbour_function>``` is one of chars ```r``` or ```c```. Choosing ```r``` will choose next **state** of our program by drawing and swapping 2 random points, while ```c``` only draws one and swaps it with its neighbour.
 - ```<distance_metric>``` is one of chars ```e``` or ```m```. You basically choose how to define distance between two points. ```e``` stands for euclidean distance ($\sqrt{\left( x_{1} - y_{1} \right)^{2} + \left( x_{2} - y_{2} \right)^{2}}$) while ```m``` is manhatan distance ($\left| x_{1} - x_{2} \right| + \left| y_{1} - y_{2} \right|$).
 
@@ -40,7 +42,7 @@ Now is the time for an example, running
 ```
 python3 tsp.py 100 g 400000 30000 r e
 ```
-will result in something like
+will result in something like:
 
 ![Example of TSP algorithm](readme_sources/Example_1_TSP.png)
 
@@ -53,3 +55,45 @@ If you chose to make GIF you will end up with cool animation like these ones:
 ![](readme_sources/T50.gif)
 
 ## Binary image
+
+In this problem we are given a square, binary image of black and white pixels. We define **energy** for each pixel as sum of its neighbours. **State** is just current image. The algorithm tries to minimize sum of energies of every pixel. Implementation of this is prepared in ```binary_image.py``` file. My program is expecting a few command line arguments that let you customize how it is working. The usage goes like this:
+
+```
+python3 binary_image.py [--gif] <image_size> <black_points_density> <max_iterations> <initial_temperature> <temperature_slope> <neighbour_function>
+```
+
+- ```--gif``` is a flag, if set my program will generate GIF showcasing how tha algorithm is working. It is optional because generating GIFs is time consuming for high number of iterations.
+- ```<image_size>``` is number of pixels on one side of the generated image.
+- ```<black_points_density>``` is a float number between 0 and 1 that tells the program how many of generated points should be black.
+- ```<max_iteration>``` is a number of iterations algorithm should do. It is advisable to set this number to a high value like ```100 000``` or more.
+- ```<initial_temperature>``` is a starting temperature for simulated annealing algorithm, you can start by setting it to be 1 / 10 of ```<max_iteration>``` and than well feel free to experiment.
+- ```<temperature_slope>``` is a number, typically less than 50 which sets how fast the temperature should decrease. The higher this number is, the slower temperature falls.
+- ```<neighbour_function>``` is a number between 0 and 4 that tells the program how to define neighbour of a pixel.
+
+  |Number|Meaning|
+  |---|---|
+  |0|High energy when neighbours circling given point are different|
+  |1|High energy when neighbours circling given point are the same|
+  |2|High energy when neighbours on plus positions are different|
+  |3|High energy when neighbours on cross positions are different|
+  |4|High energy when neighbours on wider cross positions are the same|
+
+Now is the time for an example, running
+```
+python3 binary_image.py 500 0.3 1500000 100 5 0
+```
+will result in something like:
+
+![Example of binary image algorithm](./readme_sources/Example_2_binary.png)
+
+If you chose to make GIF you will end up with cool animation like these ones:
+
+![](readme_sources/N0.gif)
+
+![](readme_sources/N1.gif)
+
+![](readme_sources/N2.gif)
+
+![](readme_sources/N3.gif)
+
+![](readme_sources/N4.gif)
