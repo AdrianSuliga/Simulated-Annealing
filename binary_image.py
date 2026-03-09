@@ -290,9 +290,8 @@ def main() -> None:
 
     parser.add_argument(
         '--gif',
-        help = "Do you want to make a GIF showcasing how the algorithm works?",
-        action = argparse.BooleanOptionalAction,
-        default = False
+        help = "Make a GIF showcasing how the algorithm works",
+        action = 'store_true'
     )
 
     args = parser.parse_args()
