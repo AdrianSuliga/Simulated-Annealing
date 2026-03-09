@@ -97,3 +97,7 @@ If you chose to make GIF you will end up with cool animation like these ones:
 ![](readme_sources/N3.gif)
 
 ![](readme_sources/N4.gif)
+
+## Sudoku
+
+

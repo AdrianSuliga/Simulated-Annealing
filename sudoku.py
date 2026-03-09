@@ -2,7 +2,7 @@ from math import exp
 from random import random, randint
 import matplotlib.pyplot as plt
 
-def read_sudoku(path):
+def read_sudoku(path: str) -> tuple:
     S, C = [], []
     with open(path, 'r') as file:
         for line in file:
@@ -13,17 +13,17 @@ def read_sudoku(path):
 
     return S, C
 
-def print_sudoku(S):
+def print_sudoku(S: list) -> None:
     for line in S:
         for character in line:
             print(character, end=' ')
         print("")
 
-def schedule_prob(E, T):
+def schedule_prob(E: int, T: float) -> float:
     if E < 0: return 1
     return exp(-E / T)
 
-def schedule_neighbour(S, C):
+def schedule_neighbour(S:list, C: list) -> tuple:
     x1 = x2 = y1 = y2 = 0
 
     while True:
@@ -35,10 +35,10 @@ def schedule_neighbour(S, C):
 
     return x1, y1, x2, y2
 
-def schedule_temp(T, a):
+def schedule_temp(T: float, a: float) -> float:
     return T * (1 - a)
 
-def is_point_incorrect(S, x, y):
+def is_point_incorrect(S: list, x: int, y: int) -> bool:
     value = S[x][y]
 
     for i in range(9):
@@ -62,7 +62,10 @@ def is_point_incorrect(S, x, y):
             
     return False         
 
-def count_sudoku_errors(Sudoku):
+def is_point_correct(S: list, x: int, y: int) -> bool:
+    return not is_point_incorrect(S, x, y)
+
+def count_sudoku_errors(Sudoku: list) -> int:
     errors = 0
     for i in range(9):
         for j in range(9):
@@ -70,7 +73,7 @@ def count_sudoku_errors(Sudoku):
                 errors += 1
     return errors
     
-def count_energy_difference(Sudoku, P1, P2):
+def count_energy_difference(Sudoku: list, P1: tuple, P2: tuple) -> int:
     x1, y1 = P1
     x2, y2 = P2
 
@@ -84,7 +87,7 @@ def count_energy_difference(Sudoku, P1, P2):
 
     return end_energy - start_energy
 
-def simulated_annealing(path, max_iter, init_temp, a, limit):
+def simulated_annealing(path: str, max_iter: int, init_temp: int, a: float, limit: int) -> None:
     xs, ys = [], []
     S, C = read_sudoku(path)
 
@@ -117,17 +120,36 @@ def simulated_annealing(path, max_iter, init_temp, a, limit):
         xs.append(i)
 
         if current_energy <= 0: break   
-    
+
     plt.figure()
     plt.title(f"Błąd końcowy dla {path} to {current_energy}")
     plt.xlabel('Iteracja')
     plt.ylabel('Wartość')
     plt.plot(xs, ys)
     plt.grid(True)
+    plt.show()
 
-    print_sudoku(S) 
+    fig, ax = plt.subplots()
+
+    fig.patch.set_visible(False)
+    fig.tight_layout()
+
+    ax.axis('off')
+    ax.axis('tight')
+
+    table = ax.table(S, loc='center')
+    table.scale(1, 3)
+
+    for (row, col), cell in table.get_celld().items():
+        cell.set_text_props(ha='center', va='center')
+
+        if is_point_correct(S, row, col):
+            cell.set_facecolor((0.5, 1, 0.5))
+        else:
+            cell.set_facecolor((1, 0.5, 0.5))
+
     plt.show()
   
 #simulated_annealing("sudokus/sudoku1.txt", 100000, 4, 1e-4, 1e-2)
 #simulated_annealing("sudokus/sudoku2.txt", 1000000, 1000, 1e-5, 1e-2)
-#simulated_annealing("sudokus/sudoku3.txt", 1000000, 1000, 1e-5, 1e-4)
+simulated_annealing("sudokus/sudoku3.txt", 1000000, 1000, 1e-5, 1e-4)
