@@ -314,6 +314,5 @@ def main() -> None:
         make_gif
     )
 
-
 if __name__ == "__main__":
     main()

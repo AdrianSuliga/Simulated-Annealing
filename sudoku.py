@@ -1,6 +1,21 @@
 from math import exp
 from random import random, randint
+from os.path import isfile
 import matplotlib.pyplot as plt
+import argparse
+
+# VALIDATION OF COMMAND LINE ARGUMENTS
+def validate_positive_int(data: int) -> int:
+    if data > 0:
+        return data
+    else:
+        raise TypeError("Only positive numbers can be used")
+    
+def validate_filepath(path: str) -> str:
+    if isfile(path):
+        return path
+    else:
+        raise TypeError(f"File {path} does not exist")
 
 # SUDOKU FUNCTIONS
 # Read sudoku as double matrix
@@ -98,7 +113,8 @@ def count_energy_difference(Sudoku: list, P1: tuple, P2: tuple) -> int:
     return end_energy - start_energy
 
 # Making GIF is optional since it takes a lot of time
-def simulated_annealing(path: str, max_iter: int, init_temp: int, a: float, limit: int) -> None:
+def simulated_annealing(path: str, max_iter: int, init_temp: int, a: float,
+                        limit: int, make_gif: bool = False) -> None:
     xs, ys = [], []
     S, C = read_sudoku(path)
 
@@ -160,7 +176,64 @@ def simulated_annealing(path: str, max_iter: int, init_temp: int, a: float, limi
             cell.set_facecolor((1, 0.5, 0.5))
 
     plt.show()
-  
-#simulated_annealing("sudokus/sudoku1.txt", 100000, 4, 1e-4, 1e-2)
-#simulated_annealing("sudokus/sudoku2.txt", 1000000, 1000, 1e-5, 1e-2)
-simulated_annealing("sudokus/sudoku3.txt", 1000000, 1000, 1e-5, 1e-4)
+
+# Argparse argument validation
+def main() -> None:
+    parser = argparse.ArgumentParser(description = "Generate sudoku solution with simulated annealing")
+
+    parser.add_argument(
+        "path",
+        help = "Path to text file with initial sudoku state",
+        type = str
+    )
+
+    parser.add_argument(
+        "max_iterations",
+        help = "Number of iterations for algorithm",
+        type = int
+    )
+
+    parser.add_argument(
+        "initial_temperature",
+        help = "Initial temperature for the algorithm",
+        type = int
+    )
+
+    parser.add_argument(
+        "temperature_slope",
+        help = "How fast should temperature decrease. The higher the number, the slower the fall",
+        type = int
+    )
+
+    parser.add_argument(
+        "limit",
+        help = "n where 1e-n is lower limit for temperature",
+        type = int
+    )
+
+    parser.add_argument(
+        "--gif",
+        help = "Make a GIF showcasing how the algorithm works",
+        action = 'store_true'
+    )
+
+    args = parser.parse_args()
+
+    path = validate_filepath(args.path)
+    max_iter = validate_positive_int(args.max_iterations)
+    init_temp = validate_positive_int(args.initial_temperature)
+    slope = validate_positive_int(args.temperature_slope)
+    limit = validate_positive_int(args.limit)
+    make_gif = args.gif
+
+    simulated_annealing(
+        path,
+        max_iter,
+        init_temp,
+        10 ** (-slope),
+        10 ** (-limit),
+        make_gif
+    )
+
+if __name__ == "__main__":
+    main()
