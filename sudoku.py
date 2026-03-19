@@ -2,6 +2,8 @@ from math import exp
 from random import random, randint
 import matplotlib.pyplot as plt
 
+# SUDOKU FUNCTIONS
+# Read sudoku as double matrix
 def read_sudoku(path: str) -> tuple:
     S, C = [], []
     with open(path, 'r') as file:
@@ -13,16 +15,19 @@ def read_sudoku(path: str) -> tuple:
 
     return S, C
 
+# Print given sudoku
 def print_sudoku(S: list) -> None:
     for line in S:
         for character in line:
             print(character, end=' ')
         print("")
 
+# PROBABILITY
 def schedule_prob(E: int, T: float) -> float:
     if E < 0: return 1
     return exp(-E / T)
 
+# NEIGHBOUR SELECTION
 def schedule_neighbour(S:list, C: list) -> tuple:
     x1 = x2 = y1 = y2 = 0
 
@@ -35,9 +40,12 @@ def schedule_neighbour(S:list, C: list) -> tuple:
 
     return x1, y1, x2, y2
 
+# TEMPERATURE
 def schedule_temp(T: float, a: float) -> float:
     return T * (1 - a)
 
+# SIMULATED ANNEALING
+# Check point incorrectness 
 def is_point_incorrect(S: list, x: int, y: int) -> bool:
     value = S[x][y]
 
@@ -62,17 +70,19 @@ def is_point_incorrect(S: list, x: int, y: int) -> bool:
             
     return False         
 
+# Check point correctness
 def is_point_correct(S: list, x: int, y: int) -> bool:
     return not is_point_incorrect(S, x, y)
 
+# Count total errors in sudoku
 def count_sudoku_errors(Sudoku: list) -> int:
     errors = 0
     for i in range(9):
         for j in range(9):
-            if is_point_incorrect(Sudoku, i, j):
-                errors += 1
+                errors += is_point_incorrect(Sudoku, i, j)
     return errors
     
+# Energy difference when wanting to swap P1 with P2
 def count_energy_difference(Sudoku: list, P1: tuple, P2: tuple) -> int:
     x1, y1 = P1
     x2, y2 = P2
@@ -87,6 +97,7 @@ def count_energy_difference(Sudoku: list, P1: tuple, P2: tuple) -> int:
 
     return end_energy - start_energy
 
+# Making GIF is optional since it takes a lot of time
 def simulated_annealing(path: str, max_iter: int, init_temp: int, a: float, limit: int) -> None:
     xs, ys = [], []
     S, C = read_sudoku(path)
